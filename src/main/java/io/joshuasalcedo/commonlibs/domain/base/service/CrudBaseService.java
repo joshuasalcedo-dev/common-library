@@ -2,7 +2,7 @@ package io.joshuasalcedo.commonlibs.domain.base.service;
 
 import io.joshuasalcedo.commonlibs.domain.base.BaseEntity;
 import io.joshuasalcedo.commonlibs.domain.base.BaseRepository;
-import io.joshuasalcedo.commonlibs.domain.base.ResourceNotFoundException;
+import io.joshuasalcedo.commonlibs.domain.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,2 +1,7 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.joshuasalcedo.commonlibs.autoconfigure.BannerAutoConfiguration
+io.joshuasalcedo.commonlibs.autoconfigure.BannerAutoConfiguration,\
+io.joshuasalcedo.commonlibs.autoconfigure.ControllerAutoConfiguration,\
+io.joshuasalcedo.commonlibs.autoconfigure.EntityAutoConfiguration,\
+io.joshuasalcedo.commonlibs.autoconfigure.EntityLifecycleAutoConfiguration,\
+io.joshuasalcedo.commonlibs.autoconfigure.RepositoryAutoConfiguration,\
+io.joshuasalcedo.commonlibs.autoconfigure.ServiceAutoConfiguration

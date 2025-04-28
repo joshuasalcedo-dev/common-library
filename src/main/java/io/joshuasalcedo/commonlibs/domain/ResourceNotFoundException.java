@@ -1,4 +1,4 @@
-package io.joshuasalcedo.commonlibs.domain.base;
+package io.joshuasalcedo.commonlibs.domain;
 
 /**
  * Exception thrown when a requested resource cannot be found.

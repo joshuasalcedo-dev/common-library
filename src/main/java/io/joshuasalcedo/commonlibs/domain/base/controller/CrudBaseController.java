@@ -1,7 +1,7 @@
 package io.joshuasalcedo.commonlibs.domain.base.controller;
 
 import io.joshuasalcedo.commonlibs.domain.base.BaseEntity;
-import io.joshuasalcedo.commonlibs.domain.base.ResourceNotFoundException;
+import io.joshuasalcedo.commonlibs.domain.ResourceNotFoundException;
 import io.joshuasalcedo.commonlibs.domain.base.dto.ResponseDTO;
 import io.joshuasalcedo.commonlibs.domain.base.service.BaseService;
 

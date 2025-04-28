@@ -1,105 +1,187 @@
 {
   "groups": [
     {
-      "name": "io.joshuasalcedo.banner",
+      "name": "io.joshuasalcedo.common",
+      "type": "io.joshuasalcedo.commonlibs.properties",
+      "description": "Common Library configuration properties for all modules and components.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.banner",
       "type": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
+      "description": "Configuration properties for customizing the application banner.",
       "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain",
+      "type": "io.joshuasalcedo.commonlibs.properties.DomainProperties",
+      "description": "Configuration properties for domain layer components including entities, repositories, and services.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity",
+      "type": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig",
+      "description": "Configuration properties for entity behavior and auditing.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig"
     }
   ],
   "properties": [
     {
-      "name": "io.joshuasalcedo.banner.enabled",
+      "name": "io.joshuasalcedo.common.banner.enabled",
       "type": "java.lang.Boolean",
-      "description": "Enable or disable the custom banner.",
+      "description": "Enable or disable the custom banner. When enabled, a custom banner will be displayed during application startup.",
       "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
       "defaultValue": true
     },
     {
-      "name": "io.joshuasalcedo.banner.location",
+      "name": "io.joshuasalcedo.common.banner.location",
       "type": "java.lang.String",
-      "description": "Path to the custom banner resource.",
+      "description": "Path to the custom banner resource file. Can be an absolute path or a classpath resource (e.g., 'classpath:custom-banner.txt').",
       "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
       "defaultValue": "classpath:banner.txt"
     },
     {
-      "name": "io.joshuasalcedo.banner.color",
+      "name": "io.joshuasalcedo.common.banner.color",
       "type": "java.lang.String",
-      "description": "Text color of the banner.",
+      "description": "Text color of the banner. Supports ANSI color names for terminal output customization.",
       "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
       "defaultValue": "default"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity.enable-auditing",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable automatic entity auditing. When enabled, creation and modification timestamps and user information will be automatically tracked.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity.system-username",
+      "type": "java.lang.String",
+      "description": "Default username to use for system actions when no user is authenticated. This will be recorded in audit fields for changes made by background processes.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig",
+      "defaultValue": "system"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity.enable-soft-delete",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable soft delete functionality. When enabled, entities will be marked as deleted instead of physically removed from the database.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity.lifecycle-events-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable entity lifecycle events. When enabled, events will be published for entity creation, update, and deletion operations.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.repository.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable custom repository functionality. Controls whether the repository auto-configuration is applied.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$RepositoryConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.service.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable service layer auto-configuration. Controls whether the service auto-configuration is applied.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ServiceConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.service.enable-validation",
+      "type": "java.lang.Boolean",
+      "description": "Enable validation at service layer. When enabled, entities will be validated before saving using Bean Validation.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ServiceConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.controller.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable generic controllers. Controls whether the controller auto-configuration is applied.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ControllerConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.controller.base-path",
+      "type": "java.lang.String",
+      "description": "Base path for REST endpoints. This path will be prepended to all controller endpoints.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ControllerConfig",
+      "defaultValue": "/api"
     }
   ],
   "hints": [
     {
-      "name": "io.joshuasalcedo.banner.color",
+      "name": "io.joshuasalcedo.common.banner.color",
       "values": [
         {
           "value": "default",
-          "description": "Default color"
+          "description": "Default color (no specific color applied)"
         },
         {
           "value": "black",
-          "description": "Black"
+          "description": "Black text color"
         },
         {
           "value": "red",
-          "description": "Red"
+          "description": "Red text color"
         },
         {
           "value": "green",
-          "description": "Green"
+          "description": "Green text color"
         },
         {
           "value": "yellow",
-          "description": "Yellow"
+          "description": "Yellow text color"
         },
         {
           "value": "blue",
-          "description": "Blue"
+          "description": "Blue text color"
         },
         {
           "value": "magenta",
-          "description": "Magenta"
+          "description": "Magenta text color"
         },
         {
           "value": "cyan",
-          "description": "Cyan"
+          "description": "Cyan text color"
         },
         {
           "value": "white",
-          "description": "White"
+          "description": "White text color"
         },
         {
           "value": "bright_black",
-          "description": "Bright Black"
+          "description": "Bright Black (Gray) text color"
         },
         {
           "value": "bright_red",
-          "description": "Bright Red"
+          "description": "Bright Red text color"
         },
         {
           "value": "bright_green",
-          "description": "Bright Green"
+          "description": "Bright Green text color"
         },
         {
           "value": "bright_yellow",
-          "description": "Bright Yellow"
+          "description": "Bright Yellow text color"
         },
         {
           "value": "bright_blue",
-          "description": "Bright Blue"
+          "description": "Bright Blue text color"
         },
         {
           "value": "bright_magenta",
-          "description": "Bright Magenta"
+          "description": "Bright Magenta text color"
         },
         {
           "value": "bright_cyan",
-          "description": "Bright Cyan"
+          "description": "Bright Cyan text color"
         },
         {
           "value": "bright_white",
-          "description": "Bright White"
+          "description": "Bright White text color"
         }
       ]
     }

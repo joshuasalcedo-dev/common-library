@@ -18,7 +18,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '11' # Adjust to your Java version
+          java-version: '21' # Adjust to your Java version
           distribution: 'adopt'
           cache: maven
 
@@ -95,7 +95,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '11' # Adjust to your Java version
+          java-version: '21' # Adjust to your Java version
           distribution: 'adopt'
           cache: maven
 

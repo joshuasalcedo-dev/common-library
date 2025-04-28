@@ -6,6 +6,11 @@ on:
   push:
     branches: [ main ]
 
+# Add permissions for GitHub Actions
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   verify-version-change:
     runs-on: ubuntu-latest
@@ -18,9 +23,12 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '21' # Adjust to your Java version
+          java-version: '21'
           distribution: 'adopt'
           cache: maven
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
 
       - name: Get current version
         id: current_version
@@ -91,13 +99,17 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Important for getting version info
+          token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '21' # Adjust to your Java version
+          java-version: '21'
           distribution: 'adopt'
           cache: maven
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
 
       - name: Extract Maven project version
         id: get_version
@@ -109,7 +121,7 @@ jobs:
       - name: Build and deploy with Maven
         id: mvn_deploy
         run: |
-          # Run Maven and save exit status
+          # Run Maven with settings file
           mvn clean deploy
           MAVEN_EXIT_CODE=$?
           echo "MAVEN_EXIT_CODE=$MAVEN_EXIT_CODE" >> $GITHUB_ENV
@@ -121,14 +133,16 @@ jobs:
       - name: Create and push tag
         if: env.MAVEN_EXIT_CODE == '0'
         run: |
-          git config --local user.email "github-actions@github.com"
-          git config --local user.name "GitHub Actions"
+          git config --local user.email "dev@joshuasalcedo.io"
+          git config --local user.name "joshuasalcedo-dev"
           
           # Create a tag with the extracted version
           git tag -a v${{ env.VERSION }} -m "Release version ${{ env.VERSION }}"
           
-          # Push the tag
-          git push --tags
+          # Push the tag using authenticated URL
+          git push origin v${{ env.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
 
       - name: Generate Release Notes
         if: success()
@@ -160,7 +174,7 @@ jobs:
           body: ${{ env.RELEASE_NOTES }}
           draft: false
           prerelease: false
-          token: ${{ github.token }}
+          token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN}}
 
       - name: Send Telegram notification on deployment failure
         if: failure() && github.job == 'build-and-tag'

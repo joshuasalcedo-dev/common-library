@@ -151,19 +151,17 @@ jobs:
           # Get commits since the last tag
           PREVIOUS_TAG=$(git describe --tags --abbrev=0 --always HEAD^ 2>/dev/null || echo "")
 
+          # Create release notes file
+          echo "## What's Changed" > release_notes.md
+
           if [ -z "$PREVIOUS_TAG" ]; then
             # If there's no previous tag, get all commits
-            echo 'RELEASE_NOTES<<EOFMARKER' >> $GITHUB_ENV
-            echo '## What'"'"'s Changed' >> $GITHUB_ENV
-            git log --pretty=format:"* %s (%h) - %an" >> $GITHUB_ENV
-            echo 'EOFMARKER' >> $GITHUB_ENV
+            git log --pretty=format:"* %s (%h) - %an" >> release_notes.md
           else
             # Get commits between last tag and current commit
-            echo 'RELEASE_NOTES<<EOFMARKER' >> $GITHUB_ENV
-            echo '## What'"'"'s Changed' >> $GITHUB_ENV
-            git log --pretty=format:"* %s (%h) - %an" $PREVIOUS_TAG..HEAD >> $GITHUB_ENV
-            echo 'EOFMARKER' >> $GITHUB_ENV
+            git log --pretty=format:"* %s (%h) - %an" $PREVIOUS_TAG..HEAD >> release_notes.md
           fi
+      
 
       - name: Create GitHub Release
         if: success()
@@ -171,10 +169,11 @@ jobs:
         with:
           tag_name: v${{ env.VERSION }}
           name: Release v${{ env.VERSION }}
-          body: ${{ env.RELEASE_NOTES }}
+          body_path: release_notes.md
           draft: false
           prerelease: false
           token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN}}
+
 
       - name: Send Telegram notification on deployment failure
         if: failure() && github.job == 'build-and-tag'
@@ -204,17 +203,14 @@ jobs:
           token: "8041139682:AAG_XUO5LqXC1EeQn8E1ApvViTeb3bewiHc"
           message: |
             ✅ *Deployment Successful!*
-            
+
             *Repository:* ${{ github.repository }}
             *Version:* v${{ env.VERSION }}
             *Branch:* ${{ github.ref_name }}
-            
+
             A new version has been successfully deployed and tagged.
-            
-            *Release Notes:*
-            ${{ env.RELEASE_NOTES }}
-            
+
             *Deployed by:* @${{ github.actor }}
-            
+
             [View Release](https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }})
           format: markdown

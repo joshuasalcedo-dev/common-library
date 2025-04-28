@@ -1,0 +1,212 @@
+- uses: actions/checkout@v3
+    with:
+      fetch-depth: 0 # Important for getting version info
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11' # Adjust to your Java version
+        distribution: 'adopt'
+        cache: maven
+
+    - name: Get current version and increment
+      id: version
+      run: |
+        # Extract current version from pom.xml
+        CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        echo "Current version: $CURRENT_VERSION"
+        
+        # Parse the version components
+        if [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-SNAPSHOT)?$ ]]; then
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          PATCH="${BASH_REMATCH[3]}"
+          SNAPSHOT="${BASH_REMATCH[4]}"
+        
+          # Increment patch version
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH$SNAPSHOT"
+        
+          echo "Incrementing to new version: $NEW_VERSION"
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        
+          # Update the version in pom.xml
+          mvn versions:set -DnewVersion=$NEW_VERSION -DgenerateBackupname: Maven Deploy and Tag
+
+on:
+  # Trigger the workflow manually or when you push to main
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  verify-version-change:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11' # Adjust to your Java version
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Get current version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Check previous version
+        id: check_version
+        run: |
+          # Get the previous commit on this branch
+          PREVIOUS_COMMIT=$(git rev-parse HEAD^)
+          
+          # Check out the previous commit to get its pom.xml
+          git checkout $PREVIOUS_COMMIT
+          
+          # Get the previous version
+          PREVIOUS_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
+          echo "Previous version: $PREVIOUS_VERSION"
+          
+          # Return to current commit
+          git checkout -
+          
+          # Compare versions
+          if [ "$CURRENT_VERSION" == "$PREVIOUS_VERSION" ]; then
+            echo "::error::Version in pom.xml has not changed! Current and previous versions are both $CURRENT_VERSION"
+            echo "VERSION_CHANGED=false" >> $GITHUB_ENV
+            exit 1
+          else
+            echo "Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
+            echo "VERSION_CHANGED=true" >> $GITHUB_ENV
+          fi
+
+      - name: Send Telegram notification on version check failure
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: "-1002382493793"
+          token: "8041139682:AAG_XUO5LqXC1EeQn8E1ApvViTeb3bewiHc"
+          message: |
+            ❌ *Version Check Failed!*
+            
+            Repository: ${{ github.repository }}
+            Commit: ${{ github.sha }}
+            
+            The version in pom.xml was not changed! Please update the version before pushing to main.
+            Current and previous versions are both ${{ env.CURRENT_VERSION }}
+            
+            Triggered by: ${{ github.actor }}
+          format: markdown
+          disable_notification: false
+  
+  build-and-tag:
+    needs: verify-version-change
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Important for getting version info
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11' # Adjust to your Java version
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Extract Maven project version
+        id: get_version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Extracted version: $VERSION"
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
+            echo "Tag v$VERSION already exists. Will not create duplicate tag."
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
+            echo "Tag v$VERSION does not exist. Will create new tag."
+          fi
+
+      - name: Build and deploy with Maven
+        run: mvn clean deploy
+        # No need for explicit secrets as we're using the default GITHUB_TOKEN
+
+      - name: Create and push tag
+        if: success()
+        run: |
+          git config --local user.email "github-actions@github.com"
+          git config --local user.name "GitHub Actions"
+          
+          # Create a tag with the extracted version
+          git tag -a v${{ env.VERSION }} -m "Release version ${{ env.VERSION }}"
+          
+          # Push the tag
+          git push --tags
+
+      - name: Generate Release Notes
+        if: success()
+        id: release_notes
+        run: |
+          # Get commits since the last tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 --always HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # If there's no previous tag, get all commits
+            echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+            echo "## What's Changed" >> $GITHUB_ENV
+            git log --pretty=format:"* %s (%h) - %an" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          else
+            # Get commits between last tag and current commit
+            echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+            echo "## What's Changed" >> $GITHUB_ENV
+            git log --pretty=format:"* %s (%h) - %an" $PREVIOUS_TAG..HEAD >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
+
+      - name: Create GitHub Release
+        if: success()
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          body: ${{ env.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+          token: ${{ github.token }}
+
+      - name: Send Telegram notification on successful deployment
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: "-1002382493793"
+          token: "8041139682:AAG_XUO5LqXC1EeQn8E1ApvViTeb3bewiHc"
+          message: |
+            ✅ *Deployment Successful!*
+            
+            Repository: ${{ github.repository }}
+            Version: v${{ env.VERSION }}
+            
+            A new version has been successfully deployed and tagged.
+            
+            Release Notes:
+            ${{ env.RELEASE_NOTES }}
+            
+            Deployed by: ${{ github.actor }}
+            
+            [View Release](https://github.com/${{ github.repository }}/releases/tag/v${{ env.VERSION }})
+          format: markdown

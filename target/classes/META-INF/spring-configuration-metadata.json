@@ -1,0 +1,33 @@
+{
+  "groups": [
+    {
+      "name": "io.joshuasalcedo.banner",
+      "type": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "io.joshuasalcedo.banner.color",
+      "type": "java.lang.String",
+      "description": "Text color of the banner",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
+      "defaultValue": "default"
+    },
+    {
+      "name": "io.joshuasalcedo.banner.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable the custom banner",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.banner.location",
+      "type": "java.lang.String",
+      "description": "Path to the custom banner resource",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
+      "defaultValue": "classpath:banner.txt"
+    }
+  ],
+  "hints": []
+}

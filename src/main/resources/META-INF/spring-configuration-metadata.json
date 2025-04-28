@@ -1,0 +1,107 @@
+{
+  "groups": [
+    {
+      "name": "io.joshuasalcedo.banner",
+      "type": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "io.joshuasalcedo.banner.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable the custom banner.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.banner.location",
+      "type": "java.lang.String",
+      "description": "Path to the custom banner resource.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
+      "defaultValue": "classpath:banner.txt"
+    },
+    {
+      "name": "io.joshuasalcedo.banner.color",
+      "type": "java.lang.String",
+      "description": "Text color of the banner.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
+      "defaultValue": "default"
+    }
+  ],
+  "hints": [
+    {
+      "name": "io.joshuasalcedo.banner.color",
+      "values": [
+        {
+          "value": "default",
+          "description": "Default color"
+        },
+        {
+          "value": "black",
+          "description": "Black"
+        },
+        {
+          "value": "red",
+          "description": "Red"
+        },
+        {
+          "value": "green",
+          "description": "Green"
+        },
+        {
+          "value": "yellow",
+          "description": "Yellow"
+        },
+        {
+          "value": "blue",
+          "description": "Blue"
+        },
+        {
+          "value": "magenta",
+          "description": "Magenta"
+        },
+        {
+          "value": "cyan",
+          "description": "Cyan"
+        },
+        {
+          "value": "white",
+          "description": "White"
+        },
+        {
+          "value": "bright_black",
+          "description": "Bright Black"
+        },
+        {
+          "value": "bright_red",
+          "description": "Bright Red"
+        },
+        {
+          "value": "bright_green",
+          "description": "Bright Green"
+        },
+        {
+          "value": "bright_yellow",
+          "description": "Bright Yellow"
+        },
+        {
+          "value": "bright_blue",
+          "description": "Bright Blue"
+        },
+        {
+          "value": "bright_magenta",
+          "description": "Bright Magenta"
+        },
+        {
+          "value": "bright_cyan",
+          "description": "Bright Cyan"
+        },
+        {
+          "value": "bright_white",
+          "description": "Bright White"
+        }
+      ]
+    }
+  ]
+}

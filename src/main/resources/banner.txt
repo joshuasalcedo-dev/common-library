@@ -1,0 +1,16 @@
+
+ ███████╗    ██╗    ██╗     █████╗     ███████╗    ██╗    ██╗     █████╗
+██╔════╝    ██║    ██║    ██╔══██╗    ██╔════╝    ██║    ██║    ██╔══██╗
+███████╗    ██║ █╗ ██║    ███████║    ███████╗    ██║ █╗ ██║    ███████║
+╚════██║    ██║███╗██║    ██╔══██║    ╚════██║    ██║███╗██║    ██╔══██║
+███████║    ╚███╔███╔╝    ██║  ██║    ███████║    ╚███╔███╔╝    ██║  ██║
+╚══════╝     ╚══╝╚══╝     ╚═╝  ╚═╝    ╚══════╝     ╚══╝╚══╝     ╚═╝  ╚═╝
+
+Application Name: ${spring.application.name}
+Application Version: ${spring.application.version}
+${AnsiColor.GREEN} :: Spring Boot${spring-boot.formatted-version} :: ${AnsiColor.DEFAULT}
+${AnsiColor.GREEN}
+
+
+
+

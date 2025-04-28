@@ -150,19 +150,19 @@ jobs:
         run: |
           # Get commits since the last tag
           PREVIOUS_TAG=$(git describe --tags --abbrev=0 --always HEAD^ 2>/dev/null || echo "")
-          
+
           if [ -z "$PREVIOUS_TAG" ]; then
             # If there's no previous tag, get all commits
-            echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-            echo "## What's Changed" >> $GITHUB_ENV
+            echo 'RELEASE_NOTES<<EOFMARKER' >> $GITHUB_ENV
+            echo '## What'"'"'s Changed' >> $GITHUB_ENV
             git log --pretty=format:"* %s (%h) - %an" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
+            echo 'EOFMARKER' >> $GITHUB_ENV
           else
             # Get commits between last tag and current commit
-            echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-            echo "## What's Changed" >> $GITHUB_ENV
+            echo 'RELEASE_NOTES<<EOFMARKER' >> $GITHUB_ENV
+            echo '## What'"'"'s Changed' >> $GITHUB_ENV
             git log --pretty=format:"* %s (%h) - %an" $PREVIOUS_TAG..HEAD >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
+            echo 'EOFMARKER' >> $GITHUB_ENV
           fi
 
       - name: Create GitHub Release

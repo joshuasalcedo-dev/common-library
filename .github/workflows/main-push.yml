@@ -107,11 +107,19 @@ jobs:
           echo "Extracted version: $VERSION"
 
       - name: Build and deploy with Maven
-        run: mvn clean deploy
-        # No need for explicit secrets as we're using the default GITHUB_TOKEN
+        id: mvn_deploy
+        run: |
+          # Run Maven and save exit status
+          mvn clean deploy
+          MAVEN_EXIT_CODE=$?
+          echo "MAVEN_EXIT_CODE=$MAVEN_EXIT_CODE" >> $GITHUB_ENV
+          exit $MAVEN_EXIT_CODE
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
 
+      # Only proceed with tag and release if maven deploy was successful
       - name: Create and push tag
-        if: success()
+        if: env.MAVEN_EXIT_CODE == '0'
         run: |
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
@@ -154,8 +162,28 @@ jobs:
           prerelease: false
           token: ${{ github.token }}
 
+      - name: Send Telegram notification on deployment failure
+        if: failure() && github.job == 'build-and-tag'
+        uses: appleboy/telegram-action@master
+        with:
+          to: "-1002382493793"
+          token: "8041139682:AAG_XUO5LqXC1EeQn8E1ApvViTeb3bewiHc"
+          message: |
+            ❌ *Deployment Failed!*
+            
+            *Repository:* ${{ github.repository }}
+            *Branch:* ${{ github.ref_name }}
+            *Commit:* ${{ github.sha }}
+            
+            The Maven deployment process failed.
+            Please check the GitHub Actions logs for more details.
+            
+            Triggered by: @${{ github.actor }}
+          format: markdown
+          disable_notification: false
+
       - name: Send Telegram notification on successful deployment
-        if: success()
+        if: success() && github.job == 'build-and-tag'
         uses: appleboy/telegram-action@master
         with:
           to: "-1002382493793"

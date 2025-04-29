@@ -4,6 +4,40 @@
       "name": "io.joshuasalcedo.banner",
       "type": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
       "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain",
+      "type": "io.joshuasalcedo.commonlibs.properties.DomainProperties",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.controller",
+      "type": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ControllerConfig",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties",
+      "sourceMethod": "getController()"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity",
+      "type": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties",
+      "sourceMethod": "getEntity()"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.repository",
+      "type": "io.joshuasalcedo.commonlibs.properties.DomainProperties$RepositoryConfig",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties",
+      "sourceMethod": "getRepository()"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.service",
+      "type": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ServiceConfig",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties",
+      "sourceMethod": "getService()"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging",
+      "type": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
     }
   ],
   "properties": [
@@ -11,22 +45,121 @@
       "name": "io.joshuasalcedo.banner.color",
       "type": "java.lang.String",
       "description": "Text color of the banner",
-      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
-      "defaultValue": "default"
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties"
     },
     {
       "name": "io.joshuasalcedo.banner.enabled",
       "type": "java.lang.Boolean",
       "description": "Enable or disable the custom banner",
-      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
-      "defaultValue": true
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties"
     },
     {
       "name": "io.joshuasalcedo.banner.location",
       "type": "java.lang.String",
       "description": "Path to the custom banner resource",
-      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties",
-      "defaultValue": "classpath:banner.txt"
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.BannerProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.controller.base-path",
+      "type": "java.lang.String",
+      "description": "Base path for REST endpoints.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ControllerConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.controller.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable generic controllers.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ControllerConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity.enable-auditing",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable automatic entity auditing.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity.enable-soft-delete",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable soft delete functionality.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity.lifecycle-events-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable entity lifecycle events.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.entity.system-username",
+      "type": "java.lang.String",
+      "description": "Default name to use for system actions when no user is authenticated.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.repository.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable custom repository functionality.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$RepositoryConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.service.enable-validation",
+      "type": "java.lang.Boolean",
+      "description": "Enable validation at service layer.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ServiceConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.common.domain.service.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable service layer.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ServiceConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.base-package",
+      "type": "java.lang.String",
+      "description": "Package name to apply logging to (defaults to your base package)",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable the custom logging",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.entity-lifecycle-logging",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable logging for entity lifecycle events",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.level",
+      "type": "java.lang.String",
+      "description": "Logging level for the application Valid values: TRACE, DEBUG, INFO, WARN, ERROR",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.mask-sensitive-data",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable log masking for sensitive data",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.pattern",
+      "type": "java.lang.String",
+      "description": "Pattern to use for logging",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.request-logging",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable HTTP request logging",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.sql-logging",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable SQL query logging",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
     }
   ],
   "hints": []

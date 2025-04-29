@@ -4,4 +4,6 @@ io.joshuasalcedo.commonlibs.autoconfigure.ControllerAutoConfiguration,\
 io.joshuasalcedo.commonlibs.autoconfigure.EntityAutoConfiguration,\
 io.joshuasalcedo.commonlibs.autoconfigure.EntityLifecycleAutoConfiguration,\
 io.joshuasalcedo.commonlibs.autoconfigure.RepositoryAutoConfiguration,\
-io.joshuasalcedo.commonlibs.autoconfigure.ServiceAutoConfiguration
+io.joshuasalcedo.commonlibs.autoconfigure.ServiceAutoConfiguration, \
+io.joshuasalcedo.commonlibs.autoconfigure.LoggingAutoConfiguration, \
+io.joshuasalcedo.commonlibs.autoconfigure.DataSourceProxyConfiguration

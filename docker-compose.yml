@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  codellama:
+    image: ghcr.io/ggerganov/llama.cpp:latest
+    container_name: codellama
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/models
+    command: >
+      bash -c "wget -O /models/codellama-7b.Q4_K_M.gguf https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q4_K_M.gguf?download=true &&
+      ./server -m /models/codellama-7b.Q4_K_M.gguf -c 2048 --port 8080 --host 0.0.0.0"
+    environment:
+      - CUDA_VISIBLE_DEVICES=0  # Enable GPU if available
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped

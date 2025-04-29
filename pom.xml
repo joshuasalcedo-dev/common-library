@@ -19,7 +19,7 @@
     <!-- ======================================================== -->
     <groupId>io.joshuasalcedo</groupId>
     <artifactId>common-library</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 
     <!-- ======================================================== -->
     <!-- Properties                                               -->
@@ -73,6 +73,33 @@
 
         </dependency>
 
+        <!-- AOP Support for method logging -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- DataSource Proxy for SQL query logging (optional) -->
+        <dependency>
+            <groupId>net.ttddyy</groupId>
+            <artifactId>datasource-proxy</artifactId>
+            <version>1.10.1</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Logback dependencies for programmatic configuration -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Documentation Dependencies -->
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -93,6 +120,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

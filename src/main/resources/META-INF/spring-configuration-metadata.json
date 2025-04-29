@@ -23,6 +23,12 @@
       "type": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig",
       "description": "Configuration properties for entity behavior and auditing.",
       "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$EntityConfig"
+    },
+    {
+      "name": "io.joshuasalcedo.logging",
+      "type": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "description": "Configuration properties for the logging system.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties"
     }
   ],
   "properties": [
@@ -109,6 +115,62 @@
       "description": "Base path for REST endpoints. This path will be prepended to all controller endpoints.",
       "sourceType": "io.joshuasalcedo.commonlibs.properties.DomainProperties$ControllerConfig",
       "defaultValue": "/api"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable the custom logging system.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.level",
+      "type": "java.lang.String",
+      "description": "Default logging level for the application (TRACE, DEBUG, INFO, WARN, ERROR).",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "defaultValue": "INFO"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.entity-lifecycle-logging",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable logging for entity lifecycle events.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.request-logging",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable HTTP request logging.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.mask-sensitive-data",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable masking of sensitive data in logs.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.sql-logging",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable SQL query logging.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.pattern",
+      "type": "java.lang.String",
+      "description": "Pattern to use for log formatting.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "defaultValue": "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.base-package",
+      "type": "java.lang.String",
+      "description": "Base package to apply logging to.",
+      "sourceType": "io.joshuasalcedo.commonlibs.properties.LoggingProperties",
+      "defaultValue": "io.joshuasalcedo"
     }
   ],
   "hints": [
@@ -182,6 +244,31 @@
         {
           "value": "bright_white",
           "description": "Bright White text color"
+        }
+      ]
+    },
+    {
+      "name": "io.joshuasalcedo.common.logging.level",
+      "values": [
+        {
+          "value": "TRACE",
+          "description": "Most detailed logging level"
+        },
+        {
+          "value": "DEBUG",
+          "description": "Detailed information for debugging purposes"
+        },
+        {
+          "value": "INFO",
+          "description": "Standard information messages"
+        },
+        {
+          "value": "WARN",
+          "description": "Warning messages"
+        },
+        {
+          "value": "ERROR",
+          "description": "Error messages"
         }
       ]
     }

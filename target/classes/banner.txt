@@ -1,16 +1,26 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║  ███████╗    ██╗    ██╗     █████╗     ███████╗    ██╗    ██╗     █████╗   ║
+║ ██╔════╝    ██║    ██║    ██╔══██╗    ██╔════╝    ██║    ██║    ██╔══██╗   ║
+║ ███████╗    ██║ █╗ ██║    ███████║    ███████╗    ██║ █╗ ██║    ███████║   ║
+║ ╚════██║    ██║███╗██║    ██╔══██║    ╚════██║    ██║███╗██║    ██╔══██║   ║
+║ ███████║    ╚███╔███╔╝    ██║  ██║    ███████║    ╚███╔███╔╝    ██║  ██║   ║
+║ ╚══════╝     ╚══╝╚══╝     ╚═╝  ╚═╝    ╚══════╝     ╚══╝╚══╝     ╚═╝  ╚═╝   ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
 
- ███████╗    ██╗    ██╗     █████╗     ███████╗    ██╗    ██╗     █████╗
-██╔════╝    ██║    ██║    ██╔══██╗    ██╔════╝    ██║    ██║    ██╔══██╗
-███████╗    ██║ █╗ ██║    ███████║    ███████╗    ██║ █╗ ██║    ███████║
-╚════██║    ██║███╗██║    ██╔══██║    ╚════██║    ██║███╗██║    ██╔══██║
-███████║    ╚███╔███╔╝    ██║  ██║    ███████║    ╚███╔███╔╝    ██║  ██║
-╚══════╝     ╚══╝╚══╝     ╚═╝  ╚═╝    ╚══════╝     ╚══╝╚══╝     ╚═╝  ╚═╝
+${AnsiColor.CYAN}:: APPLICATION INFO ::${AnsiColor.DEFAULT}
+• Name: ${AnsiColor.BRIGHT_WHITE}${spring.application.name}${AnsiColor.DEFAULT}
+• Version: ${AnsiColor.BRIGHT_WHITE}${spring.application.version}${AnsiColor.DEFAULT}
+• Profile: ${AnsiColor.BRIGHT_WHITE}${spring.profiles.active:default}${AnsiColor.DEFAULT}
+• Server Port: ${AnsiColor.BRIGHT_WHITE}${server.port:8080}${AnsiColor.DEFAULT}
 
-Application Name: ${spring.application.name}
-Application Version: ${spring.application.version}
-${AnsiColor.GREEN} :: Spring Boot${spring-boot.formatted-version} :: ${AnsiColor.DEFAULT}
-${AnsiColor.GREEN}
+${AnsiColor.CYAN}:: CONFIGURATION ::${AnsiColor.DEFAULT}
+• Logging Level: ${AnsiColor.BRIGHT_WHITE}${io.joshuasalcedo.common.logging.level:INFO}${AnsiColor.DEFAULT}
+• Base Package: ${AnsiColor.BRIGHT_WHITE}${io.joshuasalcedo.common.logging.base-package:io.joshuasalcedo}${AnsiColor.DEFAULT}
+• SQL Logging: ${AnsiColor.BRIGHT_WHITE}${io.joshuasalcedo.common.logging.sql-logging:false}${AnsiColor.DEFAULT}
+• Database: ${AnsiColor.BRIGHT_WHITE}${spring.datasource.url:N/A}${AnsiColor.DEFAULT}
 
+${AnsiColor.GREEN}:: Spring Boot${spring-boot.formatted-version} ::${AnsiColor.DEFAULT}
 
-
-
+${AnsiColor.YELLOW}Starting application...${AnsiColor.DEFAULT}

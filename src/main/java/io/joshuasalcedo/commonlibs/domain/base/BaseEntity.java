@@ -120,6 +120,10 @@ public abstract class BaseEntity<ID extends Serializable> implements Serializabl
      */
     @PrePersist
     protected void onCreate() {
+        if (uuid == null) {
+            uuid = UUID.randomUUID().toString();
+        }
+
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }

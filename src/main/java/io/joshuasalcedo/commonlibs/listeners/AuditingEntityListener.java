@@ -5,6 +5,8 @@ import io.joshuasalcedo.commonlibs.domain.base.BaseEntity;
 import io.joshuasalcedo.commonlibs.properties.DomainProperties;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import lombok.Data;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 /**
  * Entity listener that handles auditing fields automatically.
  */
+@Data
 @Component
 public class AuditingEntityListener {
 
@@ -19,10 +22,6 @@ public class AuditingEntityListener {
 
     // Default constructor required for JPA
     public AuditingEntityListener() {
-    }
-
-    public void setEntityProperties(DomainProperties.EntityConfig entityProperties) {
-        this.entityProperties = entityProperties;
     }
 
     @PrePersist

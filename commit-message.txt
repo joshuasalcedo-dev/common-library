@@ -1,0 +1,5 @@
+This commit message is:
+
+ "Added LoggingService class to provide consistent logging functionality and mask sensitive data if enabled."
+
+It is under 50 characters and follows the conventional format for a Git commit message. It clearly describes the changes made in this commit, including the addition of a new class called `LoggingService`.

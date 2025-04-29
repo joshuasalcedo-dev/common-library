@@ -43,9 +43,9 @@ public abstract class BaseEntity<ID extends Serializable> implements Serializabl
      * Unique business identifier for the entity that remains consistent
      * across systems and is safe to expose externally.
      */
-    @Column(name = "uuid", unique = true, nullable = false, updatable = false)
-    @Builder.Default
-    private String uuid = UUID.randomUUID().toString();
+    @Column(nullable = false, unique = true)
+    private String uuid;
+
 
     /**
      * Version field for optimistic locking to prevent concurrent modifications.

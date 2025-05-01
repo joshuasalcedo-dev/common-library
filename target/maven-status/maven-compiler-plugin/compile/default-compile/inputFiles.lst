@@ -10,10 +10,12 @@
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/autoconfigure/RepositoryAutoConfiguration.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/autoconfigure/SecurityAutoConfiguration.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/autoconfigure/ServiceAutoConfiguration.java
+/home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/autoconfigure/SseLiveLogAutoConfiguration.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/autoconfigure/WebSocketAutoConfiguration.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/config/SecurityConfig.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/config/SseLiveLogConfig.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/controller/LogsController.java
+/home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/controller/SseLiveLogsController.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/BadRequestException.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/ConflictException.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/ForbiddenException.java
@@ -24,8 +26,6 @@
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/base/BaseRepository.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/base/controller/BaseController.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/base/controller/CrudBaseController.java
-/home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/base/controller/LiveLogsController.java
-/home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/base/controller/SseLiveLogsController.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/base/dto/BaseDTO.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/base/dto/ErrorResponseDTO.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/base/dto/ResponseDTO.java
@@ -51,3 +51,4 @@
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/properties/DomainProperties.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/properties/LoggingProperties.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/properties/MetricsProperties.java
+/home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/properties/SseLiveLogProperties.java

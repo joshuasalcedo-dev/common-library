@@ -10,7 +10,6 @@ io/joshuasalcedo/commonlibs/autoconfigure/BannerAutoConfiguration.class
 io/joshuasalcedo/commonlibs/properties/DomainProperties$EntityConfig.class
 io/joshuasalcedo/commonlibs/domain/base/BaseRepository.class
 io/joshuasalcedo/commonlibs/autoconfigure/DataSourceProxyConfiguration$1.class
-io/joshuasalcedo/commonlibs/domain/base/controller/SseLiveLogsController.class
 io/joshuasalcedo/commonlibs/domain/base/controller/BaseController.class
 io/joshuasalcedo/commonlibs/domain/logging/LoggingAspect$1.class
 io/joshuasalcedo/commonlibs/autoconfigure/ServiceAutoConfiguration.class
@@ -19,6 +18,7 @@ io/joshuasalcedo/commonlibs/listeners/AuditingEntityListener.class
 io/joshuasalcedo/commonlibs/autoconfigure/LoggingAutoConfiguration.class
 io/joshuasalcedo/commonlibs/domain/base/service/BaseService.class
 io/joshuasalcedo/commonlibs/domain/listeners/EntityLifecycleObserverRegistrar.class
+io/joshuasalcedo/commonlibs/controller/SseLiveLogsController.class
 io/joshuasalcedo/commonlibs/domain/listeners/BaseEntityObserver.class
 io/joshuasalcedo/commonlibs/autoconfigure/ControllerAutoConfiguration.class
 io/joshuasalcedo/commonlibs/autoconfigure/ActuatorAutoConfiguration.class
@@ -34,7 +34,6 @@ io/joshuasalcedo/commonlibs/properties/DomainProperties.class
 io/joshuasalcedo/commonlibs/autoconfigure/EntityLifecycleAutoConfiguration.class
 io/joshuasalcedo/commonlibs/autoconfigure/RepositoryAutoConfiguration.class
 io/joshuasalcedo/commonlibs/domain/base/dto/ErrorResponseDTO$ErrorResponseDTOBuilder.class
-io/joshuasalcedo/commonlibs/domain/base/controller/LiveLogsController.class
 io/joshuasalcedo/commonlibs/domain/base/dto/ResponseDTO.class
 io/joshuasalcedo/commonlibs/domain/base/controller/CrudBaseController.class
 io/joshuasalcedo/commonlibs/config/SecurityConfig.class
@@ -68,6 +67,7 @@ io/joshuasalcedo/commonlibs/domain/logging/LoggingManager.class
 META-INF/spring-autoconfigure-metadata.properties
 io/joshuasalcedo/commonlibs/domain/base/dto/ErrorResponseDTO.class
 io/joshuasalcedo/commonlibs/domain/logging/LoggingFactory.class
+io/joshuasalcedo/commonlibs/properties/SseLiveLogProperties.class
 io/joshuasalcedo/commonlibs/domain/base/dto/BaseDTO.class
 io/joshuasalcedo/commonlibs/autoconfigure/EntityAutoConfiguration$AuditingConfiguration.class
 io/joshuasalcedo/commonlibs/domain/base/dto/ErrorResponseDTO$ValidationError$ValidationErrorBuilder.class

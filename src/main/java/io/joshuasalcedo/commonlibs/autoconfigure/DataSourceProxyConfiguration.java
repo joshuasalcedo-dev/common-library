@@ -3,16 +3,17 @@ package io.joshuasalcedo.commonlibs.autoconfigure;
 import io.joshuasalcedo.commonlibs.properties.LoggingProperties;
 import net.ttddyy.dsproxy.listener.QueryExecutionListener;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
 /**
  * Configuration to set up datasource proxy for SQL query logging.
+ * Using BeanPostProcessor to avoid circular dependencies.
  */
 @Configuration
 @ConditionalOnClass(name = "net.ttddyy.dsproxy.support.ProxyDataSourceBuilder")
@@ -20,23 +21,26 @@ import javax.sql.DataSource;
 public class DataSourceProxyConfiguration {
 
     /**
-     * Create a proxy around the existing DataSource to intercept
-     * SQL queries for logging.
+     * Creates a BeanPostProcessor that processes the DataSource bean
+     * after it has been fully initialized but before it's used by other beans.
      */
     @Bean
-    @Primary
-    public DataSource proxyDataSource(DataSource dataSource, 
-                                     QueryExecutionListener queryExecutionListener,
-                                     LoggingProperties properties) {
-        
-        if (!properties.isSqlLogging()) {
-            return dataSource;
-        }
-        
-        return ProxyDataSourceBuilder
-                .create(dataSource)
-                .name("SQL-Query-Logger")
-                .listener(queryExecutionListener)
-                .build();
+    public BeanPostProcessor dataSourceProxyBeanPostProcessor(
+            final QueryExecutionListener queryExecutionListener,
+            final LoggingProperties properties) {
+
+        return new BeanPostProcessor() {
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String beanName) {
+                if (bean instanceof DataSource && properties.isSqlLogging()) {
+                    return ProxyDataSourceBuilder
+                            .create((DataSource) bean)
+                            .name("SQL-Query-Logger")
+                            .listener(queryExecutionListener)
+                            .build();
+                }
+                return bean;
+            }
+        };
     }
 }

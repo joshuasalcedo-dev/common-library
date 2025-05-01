@@ -1,6 +1,6 @@
 package io.joshuasalcedo.commonlibs.controller;
 
-import io.joshuasalcedo.commonlibs.config.SseLiveLogConfig;
+import io.joshuasalcedo.commonlibs.autoconfigure.SseLiveLogAutoConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +14,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/logs")
 public class SseLiveLogsController {
 
-    private final SseLiveLogConfig logConfig;
+    private final SseLiveLogAutoConfiguration logConfig;
 
-    public SseLiveLogsController(SseLiveLogConfig logConfig) {
+    public SseLiveLogsController(SseLiveLogAutoConfiguration logConfig) {
         this.logConfig = logConfig;
     }
 

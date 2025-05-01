@@ -1,58 +1,73 @@
 package io.joshuasalcedo.commonlibs.domain;
 
 import io.joshuasalcedo.commonlibs.domain.base.dto.ErrorResponseDTO;
-import io.joshuasalcedo.commonlibs.domain.base.dto.ResponseDTO;
 import io.joshuasalcedo.commonlibs.domain.logging.LoggingService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DataAccessException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
-import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.sql.SQLException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
- * Global exception handler for REST controllers.
- * Provides consistent error responses across the application.
+ * Global exception handler to provide consistent error responses across the application.
  */
-@RestControllerAdvice
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
-    private final LoggingService logger;
-    private final boolean includeStackTrace;
+    @Autowired
+    private LoggingService logger;
 
-    public GlobalExceptionHandler(LoggingService logger) {
-        this.logger = logger;
-        // In a real application, this would be configurable
-        this.includeStackTrace = false;
+    /**
+     * Check if request accepts or expects SSE (text/event-stream)
+     */
+    private boolean isEventStreamRequest(HttpServletRequest request) {
+        String accept = request.getHeader(HttpHeaders.ACCEPT);
+        String contentType = request.getContentType();
+
+        return (accept != null && accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE)) ||
+                (contentType != null && contentType.contains(MediaType.TEXT_EVENT_STREAM_VALUE));
+    }
+
+    /**
+     * Handle SSE-specific error response
+     */
+    private ResponseEntity<String> handleEventStreamError(HttpStatus status, String message) {
+        String eventData = "event: error\ndata: {\"status\":" + status.value() +
+                ",\"message\":\"" + message.replace("\"", "\\\"") +
+                "\"}\n\n";
+
+        return ResponseEntity
+                .status(status)
+                .contentType(MediaType.TEXT_EVENT_STREAM)
+                .body(eventData);
     }
 
     /**
@@ -60,68 +75,20 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<Object> handleResourceNotFoundException(
+    public ResponseEntity<?> handleResourceNotFoundException(
             ResourceNotFoundException ex, HttpServletRequest request) {
 
         logger.warn("Resource not found: {}", ex.getMessage());
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.NOT_FOUND, ex.getMessage());
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.NOT_FOUND.value())
                 .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                 .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
-
-        if (ex.getResourceName() != null) {
-            Map<String, Object> details = new HashMap<>();
-            details.put("resourceName", ex.getResourceName());
-            details.put("fieldName", ex.getFieldName());
-            details.put("fieldValue", ex.getFieldValue());
-            errorResponse.setDetails(details);
-        }
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }
-
-    /**
-     * Handle NoHandlerFoundException to replace the white label error page.
-     * This requires setting spring.mvc.throw-exception-if-no-handler-found=true
-     * and spring.web.resources.add-mappings=false in application properties.
-     */
-    @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<ErrorResponseDTO> handleNoHandlerFoundException(
-            NoHandlerFoundException ex, HttpServletRequest request) {
-
-        logger.warn("No handler found for {} {}", ex.getHttpMethod(), ex.getRequestURL());
-
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
-                .message("The requested resource is not available: " + ex.getRequestURL())
-                .path(request.getRequestURI())
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }
-
-    /**
-     * Handle NoResourceFoundException which is thrown when a static resource is not found.
-     */
-    @ExceptionHandler(NoResourceFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<ErrorResponseDTO> handleNoResourceFoundException(
-            NoResourceFoundException ex, HttpServletRequest request) {
-
-        logger.warn("No resource found: {}", ex.getMessage());
-
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
-                .message("The requested resource could not be found: " + ex.getResourcePath())
                 .path(request.getRequestURI())
                 .build();
 
@@ -133,10 +100,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDTO> handleBadRequestException(
+    public ResponseEntity<?> handleBadRequestException(
             BadRequestException ex, HttpServletRequest request) {
 
         logger.warn("Bad request: {}", ex.getMessage());
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
@@ -154,10 +125,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseEntity<ErrorResponseDTO> handleUnauthorizedException(
+    public ResponseEntity<?> handleUnauthorizedException(
             UnauthorizedException ex, HttpServletRequest request) {
 
-        logger.warn("Unauthorized access attempt: {}", ex.getMessage());
+        logger.warn("Unauthorized access: {}", ex.getMessage());
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
@@ -171,14 +146,18 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle ForbiddenException and AccessDeniedException.
+     * Handle ForbiddenException.
      */
-    @ExceptionHandler({ForbiddenException.class, AccessDeniedException.class})
+    @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<ErrorResponseDTO> handleForbiddenException(
-            Exception ex, HttpServletRequest request) {
+    public ResponseEntity<?> handleForbiddenException(
+            ForbiddenException ex, HttpServletRequest request) {
 
-        logger.warn("Access forbidden: {}", ex.getMessage());
+        logger.warn("Forbidden access: {}", ex.getMessage());
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.FORBIDDEN, ex.getMessage());
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
@@ -196,10 +175,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<ErrorResponseDTO> handleConflictException(
+    public ResponseEntity<?> handleConflictException(
             ConflictException ex, HttpServletRequest request) {
 
-        logger.warn("Conflict: {}", ex.getMessage());
+        logger.warn("Data conflict: {}", ex.getMessage());
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.CONFLICT, ex.getMessage());
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
@@ -213,160 +196,41 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle DataIntegrityViolationException for database constraint violations.
+     * Handle validation exceptions.
      */
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolationException(
-            DataIntegrityViolationException ex, HttpServletRequest request) {
-
-        logger.error("Data integrity violation: {}", ex.getMessage());
-
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.CONFLICT.value())
-                .error(HttpStatus.CONFLICT.getReasonPhrase())
-                .message("Database constraint violation: possible duplicate key or invalid foreign key reference")
-                .path(request.getRequestURI())
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-    }
-
-    /**
-     * Handle SQL exceptions.
-     */
-    @ExceptionHandler({SQLException.class, BadSqlGrammarException.class})
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<ErrorResponseDTO> handleSQLException(
+    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<?> handleValidationExceptions(
             Exception ex, HttpServletRequest request) {
 
-        logger.error("SQL exception: {}", ex.getMessage(), ex);
+        List<FieldError> fieldErrors = new ArrayList<>();
 
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message("A database error occurred. Please contact support if the problem persists.")
-                .path(request.getRequestURI())
-                .build();
+        if (ex instanceof MethodArgumentNotValidException) {
+            fieldErrors = ((MethodArgumentNotValidException) ex).getBindingResult().getFieldErrors();
+        } else if (ex instanceof BindException) {
+            fieldErrors = ((BindException) ex).getBindingResult().getFieldErrors();
+        }
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    /**
-     * Handle database access exceptions.
-     */
-    @ExceptionHandler(DataAccessException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<ErrorResponseDTO> handleDataAccessException(
-            DataAccessException ex, HttpServletRequest request) {
-
-        logger.error("Database access exception: {}", ex.getMessage(), ex);
-
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message("A database access error occurred. Please contact support if the problem persists.")
-                .path(request.getRequestURI())
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    /**
-     * Handle validation exceptions from @Valid annotations.
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDTO> handleValidationExceptions(
-            MethodArgumentNotValidException ex, HttpServletRequest request) {
-
-        List<ErrorResponseDTO.ValidationError> validationErrors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(this::convertToValidationError)
+        List<ErrorResponseDTO.ValidationError> validationErrors = fieldErrors.stream()
+                .map(fieldError -> ErrorResponseDTO.ValidationError.builder()
+                        .field(fieldError.getField())
+                        .message(fieldError.getDefaultMessage())
+                        .rejectedValue(fieldError.getRejectedValue())
+                        .build())
                 .collect(Collectors.toList());
 
-        logger.warn("Validation failed: {} errors", validationErrors.size());
+        logger.warn("Validation error: {}", validationErrors);
 
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Validation failed")
-                .path(request.getRequestURI())
-                .validationErrors(validationErrors)
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    private ErrorResponseDTO.ValidationError convertToValidationError(FieldError fieldError) {
-        return ErrorResponseDTO.ValidationError.builder()
-                .field(fieldError.getField())
-                .message(fieldError.getDefaultMessage())
-                .rejectedValue(fieldError.getRejectedValue())
-                .build();
-    }
-
-    /**
-     * Handle constraint violation exceptions from @Validated parameters.
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDTO> handleConstraintViolation(
-            ConstraintViolationException ex, HttpServletRequest request) {
-
-        List<ErrorResponseDTO.ValidationError> validationErrors = ex.getConstraintViolations()
-                .stream()
-                .map(this::convertToValidationError)
-                .collect(Collectors.toList());
-
-        logger.warn("Constraint validation failed: {} errors", validationErrors.size());
-
-        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Validation failed")
-                .path(request.getRequestURI())
-                .validationErrors(validationErrors)
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    private ErrorResponseDTO.ValidationError convertToValidationError(ConstraintViolation<?> violation) {
-        return ErrorResponseDTO.ValidationError.builder()
-                .field(violation.getPropertyPath().toString())
-                .message(violation.getMessage())
-                .rejectedValue(violation.getInvalidValue())
-                .build();
-    }
-
-    /**
-     * Handle TransactionSystemException which often wraps constraint violations.
-     */
-    @ExceptionHandler(TransactionSystemException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDTO> handleTransactionSystemException(
-            TransactionSystemException ex, HttpServletRequest request) {
-
-        logger.warn("Transaction system exception: {}", ex.getMessage());
-
-        // Check if the root cause is a constraint violation
-        Throwable cause = ex.getRootCause();
-        if (cause instanceof ConstraintViolationException) {
-            return handleConstraintViolation((ConstraintViolationException) cause, request);
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.BAD_REQUEST, "Validation failed");
         }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Transaction failed due to data validation errors")
+                .message("Validation failed")
+                .validationErrors(validationErrors)
                 .path(request.getRequestURI())
                 .build();
 
@@ -374,20 +238,39 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle missing request parameters.
+     * Handle constraint violation exceptions from validation annotations.
      */
-    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDTO> handleMissingParams(
-            MissingServletRequestParameterException ex, HttpServletRequest request) {
+    public ResponseEntity<?> handleConstraintViolationException(
+            ConstraintViolationException ex, HttpServletRequest request) {
 
-        logger.warn("Missing required parameter: {}", ex.getParameterName());
+        List<ErrorResponseDTO.ValidationError> validationErrors = ex.getConstraintViolations().stream()
+                .map(violation -> {
+                    String propertyPath = violation.getPropertyPath().toString();
+                    String field = propertyPath.contains(".") ?
+                            propertyPath.substring(propertyPath.lastIndexOf('.') + 1) : propertyPath;
+
+                    return ErrorResponseDTO.ValidationError.builder()
+                            .field(field)
+                            .message(violation.getMessage())
+                            .rejectedValue(violation.getInvalidValue())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        logger.warn("Constraint violation: {}", validationErrors);
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.BAD_REQUEST, "Validation constraints violated");
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Missing required parameter: " + ex.getParameterName())
+                .message("Validation constraints violated")
+                .validationErrors(validationErrors)
                 .path(request.getRequestURI())
                 .build();
 
@@ -399,13 +282,17 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDTO> handleMethodArgumentTypeMismatch(
+    public ResponseEntity<?> handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-
-        logger.warn("Method argument type mismatch: {}", ex.getMessage());
 
         String message = String.format("Parameter '%s' should be of type '%s'",
                 ex.getName(), ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
+
+        logger.warn("Type mismatch: {}", message);
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.BAD_REQUEST, message);
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
@@ -419,20 +306,27 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle invalid JSON request body.
+     * Handle missing request parameters.
      */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDTO> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex, HttpServletRequest request) {
+    public ResponseEntity<?> handleMissingServletRequestParameter(
+            MissingServletRequestParameterException ex, HttpServletRequest request) {
 
-        logger.warn("Invalid request body: {}", ex.getMessage());
+        String message = String.format("Required parameter '%s' of type '%s' is missing",
+                ex.getParameterName(), ex.getParameterType());
+
+        logger.warn("Missing parameter: {}", message);
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.BAD_REQUEST, message);
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Invalid request body. Please check your JSON syntax.")
+                .message(message)
                 .path(request.getRequestURI())
                 .build();
 
@@ -440,41 +334,51 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle unsupported HTTP method.
+     * Handle HttpMessageNotReadable exception.
      */
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    public ResponseEntity<ErrorResponseDTO> handleMethodNotSupported(
-            HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<?> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
 
-        logger.warn("Method not allowed: {}", ex.getMessage());
+        String message = "Malformed JSON request";
+        logger.warn("Message not readable: {}", ex.getMessage());
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.BAD_REQUEST, message);
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.METHOD_NOT_ALLOWED.value())
-                .error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase())
-                .message(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message(message)
                 .path(request.getRequestURI())
                 .build();
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     /**
-     * Handle unsupported media type.
+     * Handle HttpMediaTypeNotSupported exception.
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-    public ResponseEntity<ErrorResponseDTO> handleMediaTypeNotSupported(
+    public ResponseEntity<?> handleHttpMediaTypeNotSupported(
             HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
 
-        logger.warn("Unsupported media type: {}", ex.getMessage());
+        String message = String.format("Media type '%s' is not supported", ex.getContentType());
+        logger.warn("Unsupported media type: {}", message);
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
                 .error(HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase())
-                .message(ex.getMessage())
+                .message(message)
                 .path(request.getRequestURI())
                 .build();
 
@@ -482,20 +386,51 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle file upload size exceeded.
+     * Handle HttpRequestMethodNotSupported exception.
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ResponseEntity<?> handleHttpRequestMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+
+        String message = String.format("Method '%s' is not supported for this request", ex.getMethod());
+        logger.warn("Method not allowed: {}", message);
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.METHOD_NOT_ALLOWED, message);
+        }
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.METHOD_NOT_ALLOWED.value())
+                .error(HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase())
+                .message(message)
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    /**
+     * Handle MaxUploadSizeExceededException.
      */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
-    public ResponseEntity<ErrorResponseDTO> handleMaxUploadSizeExceeded(
+    public ResponseEntity<?> handleMaxUploadSizeExceeded(
             MaxUploadSizeExceededException ex, HttpServletRequest request) {
 
-        logger.warn("Upload size exceeded: {}", ex.getMessage());
+        String message = "File size exceeds the maximum allowed upload size";
+        logger.warn("Max upload size exceeded: {}", ex.getMessage());
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.PAYLOAD_TOO_LARGE, message);
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.PAYLOAD_TOO_LARGE.value())
                 .error(HttpStatus.PAYLOAD_TOO_LARGE.getReasonPhrase())
-                .message("File upload size exceeded the maximum allowed limit")
+                .message(message)
                 .path(request.getRequestURI())
                 .build();
 
@@ -503,24 +438,30 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle network timeout exceptions.
+     * Handle NoHandlerFoundException to replace the white label error page.
+     * This requires setting spring.mvc.throw-exception-if-no-handler-found=true
+     * and spring.web.resources.add-mappings=false in application properties.
      */
-    @ExceptionHandler({ConnectException.class, SocketTimeoutException.class, TimeoutException.class})
-    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
-    public ResponseEntity<ErrorResponseDTO> handleNetworkTimeoutException(
-            Exception ex, HttpServletRequest request) {
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<?> handleNoHandlerFoundException(
+            NoHandlerFoundException ex, HttpServletRequest request) {
 
-        logger.error("Network timeout: {}", ex.getMessage());
+        logger.warn("No handler found for {} {}", ex.getHttpMethod(), ex.getRequestURL());
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.NOT_FOUND, "The requested resource is not available: " + ex.getRequestURL());
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.GATEWAY_TIMEOUT.value())
-                .error(HttpStatus.GATEWAY_TIMEOUT.getReasonPhrase())
-                .message("Connection timed out. Please try again later.")
+                .status(HttpStatus.NOT_FOUND.value())
+                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                .message("The requested resource is not available: " + ex.getRequestURL())
                 .path(request.getRequestURI())
                 .build();
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.GATEWAY_TIMEOUT);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -528,16 +469,22 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(AsyncRequestTimeoutException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    public ResponseEntity<ErrorResponseDTO> handleAsyncRequestTimeoutException(
+    public ResponseEntity<?> handleAsyncRequestTimeoutException(
             AsyncRequestTimeoutException ex, HttpServletRequest request) {
 
         logger.error("Async request timeout: {}", ex.getMessage());
+
+        String message = "Request timed out. The server is currently unable to handle the request. Please try again later.";
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.SERVICE_UNAVAILABLE, message);
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.SERVICE_UNAVAILABLE.value())
                 .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
-                .message("Request timed out. The server is currently unable to handle the request. Please try again later.")
+                .message(message)
                 .path(request.getRequestURI())
                 .build();
 
@@ -545,36 +492,109 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle HttpMessageNotWritableException specially.
+     * This is what's causing your SSE content type issue.
+     */
+    @ExceptionHandler(HttpMessageNotWritableException.class)
+    public void handleHttpMessageNotWritableException(
+            HttpMessageNotWritableException ex,
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+
+        logger.error("Message not writable: {}", ex.getMessage());
+
+        // For SSE, we need to write directly to the response
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        if (isEventStreamRequest(request)) {
+            response.setContentType(MediaType.TEXT_EVENT_STREAM_VALUE);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
+            String eventData = "event: error\ndata: {\"status\":" + HttpStatus.INTERNAL_SERVER_ERROR.value() +
+                    ",\"message\":\"Internal server error\"}\n\n";
+            response.getOutputStream().write(eventData.getBytes(StandardCharsets.UTF_8));
+            response.getOutputStream().flush();
+        } else {
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
+            ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                    .timestamp(LocalDateTime.now())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                    .message("Internal server error")
+                    .path(request.getRequestURI())
+                    .build();
+
+            String jsonResponse = "{\"timestamp\":\"" + errorResponse.getTimestamp() + "\"," +
+                    "\"status\":" + errorResponse.getStatus() + "," +
+                    "\"error\":\"" + errorResponse.getError() + "\"," +
+                    "\"message\":\"" + errorResponse.getMessage() + "\"," +
+                    "\"path\":\"" + errorResponse.getPath() + "\"}";
+
+            response.getOutputStream().write(jsonResponse.getBytes(StandardCharsets.UTF_8));
+            response.getOutputStream().flush();
+        }
+    }
+
+    /**
      * Handle all other exceptions.
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<ErrorResponseDTO> handleGenericException(
+    public ResponseEntity<?> handleGenericException(
             Exception ex, HttpServletRequest request) {
 
         logger.error("Unhandled exception: {}", ex.getMessage(), ex);
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        }
 
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message("An unexpected error occurred. Please contact support if the problem persists.")
+                .message("An unexpected error occurred")
                 .path(request.getRequestURI())
                 .build();
 
-        // Add stack trace in development mode if enabled
-        if (includeStackTrace) {
-            Map<String, Object> details = new HashMap<>();
-            details.put("exception", ex.getClass().getName());
-            details.put("message", ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-            List<String> stackTrace = new ArrayList<>();
-            for (StackTraceElement element : ex.getStackTrace()) {
-                stackTrace.add(element.toString());
-            }
-            details.put("stackTrace", stackTrace);
-            errorResponse.setDetails(details);
+    /**
+     * Handle IOException for network and file operations.
+     */
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<?> handleIOException(
+            IOException ex, HttpServletRequest request) {
+
+        // Check for broken pipe or connection reset - client disconnected
+        if (ex.getMessage() != null &&
+                (ex.getMessage().contains("Broken pipe") ||
+                        ex.getMessage().contains("Connection reset"))) {
+
+            logger.info("Client disconnected: {}", ex.getMessage());
+            // Return null for client disconnection - response won't be delivered anyway
+            return null;
         }
+
+        // Otherwise, log as a server error
+        logger.error("I/O error: {}", ex.getMessage(), ex);
+
+        if (isEventStreamRequest(request)) {
+            return handleEventStreamError(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "A network or file operation error occurred: " + ex.getMessage());
+        }
+
+        ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
+                .message("A network or file operation error occurred: " + ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }

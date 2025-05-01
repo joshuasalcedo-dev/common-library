@@ -11,4 +11,4 @@ io.joshuasalcedo.commonlibs.autoconfigure.ActuatorAutoConfiguration, \
 io.joshuasalcedo.commonlibs.autoconfigure.ApplicationStartupListenerAutoConfiguration, \
 io.joshuasalcedo.commonlibs.autoconfigure.WebSocketAutoConfiguration, \
 io.joshuasalcedo.commonlibs.autoconfigure.SecurityAutoConfiguration, \
-io.joshuasalcedo.commonlibs.config.SseLiveLogAutoConfiguration
+io.joshuasalcedo.commonlibs.autoconfigure.SseLiveLogAutoConfiguration

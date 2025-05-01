@@ -79,7 +79,7 @@ public class LoggingConfigurator {
         // Create the encoder for the appender
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
-        encoder.setPattern("%d{HH:mm:ss.SSS} %highlight(%-5level) %magenta([%thread]) %boldCyan(%-40.40logger{39}) : %msg%n");
+        encoder.setPattern("${APP_NAME} - %d{HH:mm:ss.SSS} %highlight(%-5level) %magenta([%thread]) %boldCyan(%-40.40logger{39}) : %msg%n");
         encoder.setCharset(StandardCharsets.UTF_8);
         encoder.start();
 
@@ -98,7 +98,7 @@ public class LoggingConfigurator {
      * Configure a rolling file appender for log files.
      */
     private void configureFileAppender(LoggerContext context, Logger rootLogger) {
-        // Ensure log directory exists
+        // Ensure log files exists
         File logDir = new File(logFilePath);
         if (!logDir.exists()) {
             logDir.mkdirs();
@@ -107,7 +107,7 @@ public class LoggingConfigurator {
         // Create the encoder for the appender
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
-        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %-40.40logger{39} : %msg%n");
+        encoder.setPattern("${APP_NAME} - %d{HH:mm:ss.SSS} %highlight(%-5level) %magenta([%thread]) %boldCyan(%-40.40logger{39}) : %msg%n");
         encoder.setCharset(StandardCharsets.UTF_8);
         encoder.start();
 
@@ -123,7 +123,7 @@ public class LoggingConfigurator {
         SizeAndTimeBasedRollingPolicy<ILoggingEvent> policy = new SizeAndTimeBasedRollingPolicy<>();
         policy.setContext(context);
         policy.setParent(appender);
-        policy.setFileNamePattern(logFilePath + "/" + applicationName + "-%d{yyyy-MM-dd}-%i.log.gz");
+        policy.setFileNamePattern(logFilePath + "/" + applicationName + "/" + applicationName +"-%d{yyyy-MM-dd}-%i.log.gz");
         policy.setMaxFileSize(FileSize.valueOf("10MB"));
         policy.setMaxHistory(30);
         policy.setTotalSizeCap(FileSize.valueOf("3GB"));

@@ -26,9 +26,7 @@ public class AuditingEntityListener {
 
     @PrePersist
     public void setCreationAuditFields(Object entity) {
-        if (entity instanceof BaseEntity) {
-            BaseEntity<?> baseEntity =
-                    (BaseEntity<?>) entity;
+        if (entity instanceof BaseEntity<?> baseEntity) {
 
             if (baseEntity.getCreatedAt() == null) {
                 baseEntity.setCreatedAt(LocalDateTime.now());
@@ -45,9 +43,7 @@ public class AuditingEntityListener {
 
     @PreUpdate
     public void setUpdateAuditFields(Object entity) {
-        if (entity instanceof BaseEntity) {
-            BaseEntity<?> baseEntity =
-                    (BaseEntity<?>) entity;
+        if (entity instanceof BaseEntity<?> baseEntity) {
 
             baseEntity.setUpdatedAt(LocalDateTime.now());
             baseEntity.setUpdatedBy(getCurrentAuditor());

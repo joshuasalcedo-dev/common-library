@@ -40,12 +40,12 @@ public class LoggingProperties {
     /**
      * Enable or disable SQL query logging
      */
-    private boolean sqlLogging = false;
+    private boolean sqlLogging = true;
 
     /**
      * Pattern to use for logging
      */
-    private String pattern = "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n";
+    private String pattern = "${APP_NAME} - %d{HH:mm:ss.SSS} %highlight(%-5level) %magenta([%thread]) %boldCyan(%-40.40logger{39}) : %msg%n";
     
     /**
      * Package name to apply logging to (defaults to your base package)

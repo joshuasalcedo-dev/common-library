@@ -17,11 +17,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(prefix = "io.joshuasalcedo.common.controller", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class ControllerAutoConfiguration {
 
-    private final LoggingFactory loggingFactory;
 
-    public ControllerAutoConfiguration(LoggingFactory loggingFactory) {
-        this.loggingFactory = loggingFactory;
-    }
 
     /**
      * Creates a global exception handler bean for REST controllers.
@@ -30,7 +26,7 @@ public class ControllerAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public GlobalExceptionHandler globalExceptionHandler() {
-        LoggingService logger = loggingFactory.getLogger(GlobalExceptionHandler.class);
-        return new GlobalExceptionHandler(logger);
+
+        return new GlobalExceptionHandler();
     }
 }

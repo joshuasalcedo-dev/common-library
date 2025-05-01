@@ -13,7 +13,6 @@
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/autoconfigure/SseLiveLogAutoConfiguration.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/autoconfigure/WebSocketAutoConfiguration.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/config/SecurityConfig.java
-/home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/config/SseLiveLogConfig.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/controller/LogsController.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/controller/SseLiveLogsController.java
 /home/swa/IMPORTANT/microservice/common-library/src/main/java/io/joshuasalcedo/commonlibs/domain/BadRequestException.java

@@ -6,6 +6,7 @@ io/joshuasalcedo/commonlibs/domain/listeners/BaseEntityObserver$1.class
 io/joshuasalcedo/commonlibs/domain/base/dto/ErrorResponseDTO$ValidationError.class
 io/joshuasalcedo/commonlibs/domain/logging/LoggingAspect.class
 io/joshuasalcedo/commonlibs/domain/base/service/CrudBaseService.class
+io/joshuasalcedo/commonlibs/autoconfigure/SseLiveLogAutoConfiguration$MemoryAppender.class
 io/joshuasalcedo/commonlibs/autoconfigure/BannerAutoConfiguration.class
 io/joshuasalcedo/commonlibs/properties/DomainProperties$EntityConfig.class
 io/joshuasalcedo/commonlibs/domain/base/BaseRepository.class
@@ -26,7 +27,6 @@ io/joshuasalcedo/commonlibs/domain/ForbiddenException.class
 io/joshuasalcedo/commonlibs/domain/listeners/EntityLifecycleEvent.class
 io/joshuasalcedo/commonlibs/implementation/CustomBanner.class
 io/joshuasalcedo/commonlibs/domain/base/dto/BaseDTO$BaseDTOBuilder.class
-io/joshuasalcedo/commonlibs/config/SseLiveLogConfig.class
 io/joshuasalcedo/commonlibs/domain/logging/ThirdPartyLogger.class
 io/joshuasalcedo/commonlibs/CommonLibraryApplication.class
 io/joshuasalcedo/commonlibs/controller/LogsController$LogFileInfo.class
@@ -37,11 +37,11 @@ io/joshuasalcedo/commonlibs/domain/base/dto/ErrorResponseDTO$ErrorResponseDTOBui
 io/joshuasalcedo/commonlibs/domain/base/dto/ResponseDTO.class
 io/joshuasalcedo/commonlibs/domain/base/controller/CrudBaseController.class
 io/joshuasalcedo/commonlibs/config/SecurityConfig.class
+io/joshuasalcedo/commonlibs/autoconfigure/SseLiveLogAutoConfiguration.class
 io/joshuasalcedo/commonlibs/properties/DomainProperties$ServiceConfig.class
 io/joshuasalcedo/commonlibs/controller/LogsController.class
 io/joshuasalcedo/commonlibs/autoconfigure/SecurityAutoConfiguration.class
 io/joshuasalcedo/commonlibs/domain/logging/LogLevel.class
-io/joshuasalcedo/commonlibs/config/SseLiveLogConfig$MemoryAppender.class
 io/joshuasalcedo/commonlibs/domain/logging/SQLQueryLogger.class
 io/joshuasalcedo/commonlibs/properties/DomainProperties$RepositoryConfig.class
 io/joshuasalcedo/commonlibs/domain/logging/EntityLifecycleLogger.class

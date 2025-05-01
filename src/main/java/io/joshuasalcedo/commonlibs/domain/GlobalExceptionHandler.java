@@ -1,5 +1,6 @@
 package io.joshuasalcedo.commonlibs.domain;
 
+import com.netflix.discovery.shared.transport.TransportException;
 import io.joshuasalcedo.commonlibs.domain.base.dto.ErrorResponseDTO;
 import io.joshuasalcedo.commonlibs.domain.logging.LoggingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -94,6 +96,37 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+
+/**
+ * Handle TransportException.
+ * These typically occur when there are issues with network communication
+ * or when data transfer between services fails.
+ */
+@ExceptionHandler(TransportException.class)
+@ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+public ResponseEntity<?> handleTransportException(
+        TransportException ex, HttpServletRequest request) {
+    logger.error("Transport exception occurred: {}", ex.getMessage(), ex);
+    
+    if (isEventStreamRequest(request)) {
+        return handleEventStreamError(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+    }
+    
+    ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
+            .timestamp(LocalDateTime.now())
+            .status(HttpStatus.SERVICE_UNAVAILABLE.value())
+            .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
+            .message(ex.getMessage())
+            .path(request.getRequestURI())
+            .build();
+    
+    // Include root cause if available
+    if (ex.getCause() != null) {
+        errorResponse.setDetails(Map.of("cause : ", ex.getCause().getMessage()));
+    }
+    
+    return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
+}
 
     /**
      * Handle BadRequestException.

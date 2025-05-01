@@ -6,14 +6,15 @@
     <!-- Properties -->
     <property name="HOME_LOG_DIR" value="${user.home}/.app/logs"/>
     <property name="APP_NAME" value="${spring.application.name:-application}"/>
-
-    <!-- Use the simpler property definition syntax with fallback -->
     <property name="LOG_FILE_PATH" value="${logging.file.path:-${HOME_LOG_DIR}}"/>
 
-    <!-- Console Appender with colorful output -->
+    <!-- Console Appender with JANSI for reliable colors -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- Enable JANSI for Windows color support -->
+        <withJansi>true</withJansi>
         <encoder>
-            <pattern>${APP_NAME} - %d{HH:mm:ss.SSS} %highlight(%-5level) %magenta([%thread]) %boldCyan(%-40.40logger{39}) : %msg%n</pattern>
+            <!-- Pattern with level at the first column and ANSI color codes -->
+            <pattern>%clr([ %-5level ]){yellow} %blue(|) %yellow(%d{hh:mm:ss a}) %blue(|) %magenta([thread]) %blue(|) %cyan(%-30.30logger{30}) %blue(|) %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -28,9 +29,28 @@
             <totalSizeCap>3GB</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %-40.40logger{39} : %msg%n</pattern>
+            <!-- Pattern with level at the first column -->
+            <pattern>[ %-5level ] %d{yyyy-MM-dd hh:mm:ss.SSS a} [%thread] %-40.40logger{39} : %msg%n</pattern>
             <charset>utf8</charset>
         </encoder>
+    </appender>
+
+    <!-- Async wrapper for Console Appender -->
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="CONSOLE"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <!-- Async wrapper for File Appender -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>false</neverBlock>
     </appender>
 
     <!-- Configure loggers -->
@@ -38,9 +58,9 @@
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.hibernate" level="INFO"/>
 
-    <!-- Root logger -->
+    <!-- Root logger with async appenders -->
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
     </root>
 </configuration>

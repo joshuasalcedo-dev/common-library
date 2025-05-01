@@ -59,4 +59,8 @@ public class CustomBanner implements Banner {
             out.println("Error loading banner: " + e.getMessage());
         }
     }
+
+    public BannerProperties getProperties() {
+        return properties;
+    }
 }

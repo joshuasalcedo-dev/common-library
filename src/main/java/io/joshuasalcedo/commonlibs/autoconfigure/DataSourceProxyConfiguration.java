@@ -17,7 +17,7 @@ import javax.sql.DataSource;
  */
 @Configuration
 @ConditionalOnClass(name = "net.ttddyy.dsproxy.support.ProxyDataSourceBuilder")
-@ConditionalOnProperty(prefix = "io.joshuasalcedo.common.logging", name = "sql-logging", havingValue = "true")
+@ConditionalOnProperty(prefix = "io.joshuasalcedo.common.logging", name = "sqlLogging", havingValue = "true")
 public class DataSourceProxyConfiguration {
 
     /**

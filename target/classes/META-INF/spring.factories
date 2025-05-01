@@ -6,4 +6,8 @@ io.joshuasalcedo.commonlibs.autoconfigure.EntityLifecycleAutoConfiguration,\
 io.joshuasalcedo.commonlibs.autoconfigure.RepositoryAutoConfiguration,\
 io.joshuasalcedo.commonlibs.autoconfigure.ServiceAutoConfiguration, \
 io.joshuasalcedo.commonlibs.autoconfigure.LoggingAutoConfiguration, \
-io.joshuasalcedo.commonlibs.autoconfigure.DataSourceProxyConfiguration
+io.joshuasalcedo.commonlibs.autoconfigure.DataSourceProxyConfiguration, \
+io.joshuasalcedo.commonlibs.autoconfigure.ActuatorAutoConfiguration, \
+io.joshuasalcedo.commonlibs.autoconfigure.ApplicationStartupListenerAutoConfiguration, \
+io.joshuasalcedo.commonlibs.autoconfigure.WebSocketAutoConfiguration, \
+io.joshuasalcedo.commonlibs.autoconfigure.SecurityAutoConfiguration

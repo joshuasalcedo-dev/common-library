@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @ConditionalOnClass(name = "net.ttddyy.dsproxy.listener.QueryExecutionListener")
-@ConditionalOnProperty(prefix = "io.joshuasalcedo.common.logging", name = "sql-logging", havingValue = "true")
+@ConditionalOnProperty(prefix = "io.joshuasalcedo.common.logging", name = "sqlLogging", havingValue = "true")
 public class SQLQueryLogger implements QueryExecutionListener {
 
     private final LoggingService logger;

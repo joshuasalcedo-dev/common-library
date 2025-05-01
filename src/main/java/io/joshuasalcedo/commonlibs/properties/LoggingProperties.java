@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Configuration properties for the logging system.
  */
@@ -41,6 +44,17 @@ public class LoggingProperties {
      * Enable or disable SQL query logging
      */
     private boolean sqlLogging = true;
+
+    /**
+     * Enable or disable third-party library logging configuration
+     */
+    private boolean thirdPartyLogging = true;
+
+    /**
+     * Map of third-party logger names to log levels
+     * Example: {"org.hibernate": "INFO", "org.springframework": "WARN"}
+     */
+    private Map<String, String> thirdPartyLoggers = new HashMap<>();
 
     /**
      * Pattern to use for logging
